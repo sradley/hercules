@@ -1,13 +1,13 @@
 package http
 
 import (
-    "fmt"
     "bufio"
     "io/ioutil"
     "net/http"
     "net/url"
     "strings"
     "github.com/sradley/hercules/internal/pool"
+    "github.com/sradley/hercules/internal/util"
 )
 
 type job struct {
@@ -18,9 +18,6 @@ type job struct {
 }
 
 func Attack(args *Args) {
-    attempts := len(args.Users) * len(args.Passwords)
-    fmt.Printf("%d threads, %d login attempts, ~%d attempts per thread\n", args.Threads, attempts, attempts / args.Threads + 1)
-
     for _, user := range args.Users {
         jobs := []pool.Job{}
 
@@ -54,12 +51,11 @@ func (j job) Run() (*pool.Result, error) {
         return &pool.Result{ j.username, j.password, false }, err
     }
 
-    if strings.Contains(string(body), j.bad) {
+    if !strings.Contains(string(body), j.bad) {
         return &pool.Result{ j.username, j.password, false }, nil
     }
 
-    fmt.Printf("\nFOUND: %s : %s\n", j.username, j.password)
-
+    util.PrintResult(j.username, j.password)
     return &pool.Result{ j.username, j.password, true }, nil
 }
 

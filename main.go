@@ -8,4 +8,5 @@ import (
 func main() {
     util.PrintHeader()
     cmd.Execute()
+    util.PrintFooter()
 }

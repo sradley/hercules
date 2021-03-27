@@ -45,5 +45,11 @@ func start(cmd *cobra.Command, argv []string) {
         return
     }
 
+    attempts := len(args.Users) * len(args.Passwords)
+    fmt.Printf("[+] %d threads, %d login attempts, ~%d attempts per thread\n",
+        args.Threads, attempts, attempts / args.Threads + 1)
+
     http.Attack(args)
+
+    fmt.Printf("\n[+] attack completed, %d valid credentials(s) found\n", 1)
 }
