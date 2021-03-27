@@ -1,9 +1,5 @@
 package pool
 
-import (
-	"time"
-)
-
 var done bool
 
 type Result struct {
@@ -29,7 +25,6 @@ func Start(jobs []Job, threads int) {
 	for _, j := range jobs {
 		if !done {
 			jobs_ch <- j
-			time.Sleep(40 * time.Millisecond)
 		}
 	}
 	close(jobs_ch)
