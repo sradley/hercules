@@ -1,12 +1,13 @@
 # Hercules
-A more versatile brute-force tool. Out-of-the-box support for multiple protocols and
-parallelized connects.
+A more versatile brute-force tool. Supports multiple different protocols and
+lightning fast concurrency.
 
 ```
+$ hercules http -r request.txt -u users.txt -p passwords.txt -b "Invalid username or password."
 Hercules v0.0.1 (c) 2021 by Stephen Radley
 
 Hercules (https://github.com/sradley/hercules) starting at 2021-03-28 02:13:20
-[+] 5 threads, 14 login attempts, ~3 attempts per thread
+[+] 20 threads, 64 login attempts, ~3 attempts per thread
 [*] username: root       password: 123456
 
 [+] attack completed, 1 valid credentials(s) found
