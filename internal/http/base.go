@@ -18,6 +18,9 @@ type job struct {
 }
 
 func Attack(args *Args) {
+    attempts := len(args.Users) * len(args.Passwords)
+    fmt.Printf("%d threads, %d login attempts, ~%d attempts per thread\n", args.Threads, attempts, attempts / args.Threads + 1)
+
     for _, user := range args.Users {
         jobs := []pool.Job{}
 
@@ -29,39 +32,35 @@ func Attack(args *Args) {
     }
 }
 
-func (j job) Run() *pool.Result {
+func (j job) Run() (*pool.Result, error) {
     j.request = strings.Replace(j.request, "^USER^", j.username, -1)
     j.request = strings.Replace(j.request, "^PASS^", j.password, -1)
 
     request, err := buildRequest(j.request)
     if err != nil {
-        fmt.Println("here")
-        fmt.Println(err)
-        return &pool.Result{ j.username, j.password, false }
+        return &pool.Result{ j.username, j.password, false }, err
     }
 
     client := &http.Client{}
 
     resp, err := client.Do(request)
     if err != nil {
-        fmt.Println(err)
-        return &pool.Result{ j.username, j.password, false }
+        return &pool.Result{ j.username, j.password, false }, err
     }
     defer resp.Body.Close()
 
     body, err := ioutil.ReadAll(resp.Body)
     if err != nil {
-        fmt.Println(err)
-        return &pool.Result{ j.username, j.password, false }
+        return &pool.Result{ j.username, j.password, false }, err
     }
 
     if !strings.Contains(string(body), j.bad) {
-        return &pool.Result{ j.username, j.password, false }
+        return &pool.Result{ j.username, j.password, false }, nil
     }
 
-    fmt.Printf("FOUND: %s : %s\n", j.username, j.password)
+    fmt.Printf("\nFOUND: %s : %s\n", j.username, j.password)
 
-    return &pool.Result{ j.username, j.password, true }
+    return &pool.Result{ j.username, j.password, true }, nil
 }
 
 func buildRequest(request string) (*http.Request, error) {

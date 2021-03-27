@@ -1,6 +1,10 @@
 package pool
 
-var done bool = false
+import (
+	"time"
+)
+
+var done bool
 
 type Result struct {
 	Username string
@@ -9,7 +13,7 @@ type Result struct {
 }
 
 type Job interface {
-	Run() *Result
+	Run() (*Result, error)
 }
 
 func Start(jobs []Job, threads int) {
@@ -23,27 +27,39 @@ func Start(jobs []Job, threads int) {
 	}
 
 	for _, j := range jobs {
-		jobs_ch <- j
+		if !done {
+			jobs_ch <- j
+			time.Sleep(40 * time.Millisecond)
+		}
 	}
 	close(jobs_ch)
 
 	for _ = range jobs {
-		<- resu_ch
+		if !done {
+			<- resu_ch
+		}
 	}
 }
 
 func worker(jobs <- chan Job, results chan <- *Result) {
 	for j := range jobs {
 		if done {
-			close(results)
 			break
 		}
 
-		result := j.Run()
+		result, err := j.Run()
+		if err != nil {
+			panic(err)
+		}
+
 		if result.Success {
 			// kind of a race condition, sorry lmao
 			done = true
+			close(results)
 		}
-		results <- result
+
+		if !done {
+			results <- result
+		}
 	}
 }
