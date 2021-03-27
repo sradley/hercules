@@ -51,7 +51,7 @@ func (j job) Run() (*pool.Result, error) {
         return &pool.Result{ j.username, j.password, false }, err
     }
 
-    if !strings.Contains(string(body), j.bad) {
+    if strings.Contains(string(body), j.bad) {
         return &pool.Result{ j.username, j.password, false }, nil
     }
 
